@@ -1,0 +1,190 @@
+{
+  "app_name": "DuoVault",
+  "personality": "8 Hand-Drawn / Journal LIGHT",
+  "personality_one_liner": "An intimate, tactile, and warmly imperfect scrapbook for two.",
+  "color": {
+    "surface": "#FDFBF7",
+    "onSurface": "#2A2825",
+    "surfaceSecondary": "#F4EFEB",
+    "onSurfaceSecondary": "#4A4742",
+    "surfaceTertiary": "#EAE3DB",
+    "onSurfaceTertiary": "#2A2825",
+    "surfaceInverse": "#2A2825",
+    "onSurfaceInverse": "#FDFBF7",
+    "brand": "#8A9A86",
+    "brandPrimary": "#8A9A86",
+    "onBrandPrimary": "#FDFBF7",
+    "brandSecondary": "#A3AD98",
+    "onBrandSecondary": "#2A2825",
+    "brandTertiary": "#DCE0D9",
+    "onBrandTertiary": "#2A2825",
+    "success": "#6B8E6B",
+    "onSuccess": "#FDFBF7",
+    "warning": "#D9A05B",
+    "onWarning": "#2A2825",
+    "error": "#C47A6B",
+    "onError": "#FDFBF7",
+    "info": "#A3AD98",
+    "onInfo": "#2A2825",
+    "border": "#D5CFC7",
+    "borderStrong": "#AFA89F",
+    "divider": "#EAE3DB"
+  },
+  "typography": {
+    "displayFontFamily": "Fraunces",
+    "textFontFamily": "Nunito",
+    "scale": {
+      "sm": 12,
+      "base": 14,
+      "lg": 16,
+      "xl": 20,
+      "2xl": 24
+    }
+  },
+  "spacing": {
+    "rule": "Generous, breathable rhythm mimicking a physical journal. Never dense. Use xl/2xl for major sections.",
+    "xs": 4,
+    "sm": 8,
+    "md": 12,
+    "lg": 16,
+    "xl": 24,
+    "2xl": 32,
+    "3xl": 48
+  },
+  "radius_tokens": {
+    "sm": 6,
+    "md": 12,
+    "lg": 20,
+    "pill": 999
+  },
+  "shadow_tier": 0,
+  "navigation": "bottom_tabs",
+  "icon_set": "Feather",
+  "glassmorphism": {
+    "enabled": false,
+    "do's": [
+      "Avoid glass entirely for this personality to preserve the matte, paper-like journal feel."
+    ],
+    "dont's": [
+      "No blur effects on tab bars, modals, or headers."
+    ]
+  },
+  "platform_libraries": {
+    "glass": {
+      "ios": "expo-blur",
+      "android": "expo-blur",
+      "low_end_android_fallback": "solid surfaceSecondary"
+    },
+    "image": "expo-image",
+    "blur": "expo-blur",
+    "bottom_sheet": "@gorhom/bottom-sheet",
+    "animation": "react-native-reanimated",
+    "gesture": "react-native-gesture-handler"
+  },
+  "screens": [
+    {
+      "name": "Login",
+      "purpose": "Authenticate one of the two exclusive users to enter their private space.",
+      "states": {
+        "loading": "Centered spinner matching brand primary.",
+        "empty": "N/A",
+        "error": "Soft error toast with surfaceInverse background."
+      },
+      "layout": "Minimalist layout. A large hero illustration (line art) at the top. App title 'DuoVault' in oversized Fraunces display font. Two clean text inputs (Username, Password) spaced with 'xl'. A sticky primary CTA 'Enter' pinned to the bottom. Background is solid 'surface'."
+    },
+    {
+      "name": "FirstTimePasswordChange",
+      "purpose": "Mandatory security step for the initial login.",
+      "states": {
+        "loading": "Centered spinner.",
+        "empty": "N/A",
+        "error": "Inline error text below input in 'error' color."
+      },
+      "layout": "Text-heavy editorial layout. 'Secure Our Vault' as large title. Old Password, New Password, Confirm Password inputs. Sticky primary CTA at the bottom."
+    },
+    {
+      "name": "Gallery",
+      "purpose": "A shared scrapbook of memories with multi-select support.",
+      "states": {
+        "loading": "Skeleton frames of various heights mimicking photos.",
+        "empty": "Illustration of an empty notebook with 'Start our scrapbook' text.",
+        "error": "Error message with a 'Retry' button."
+      },
+      "layout": "Scrapbook masonry or staggered grid for photo/video cards. Cards use mixed radii (some md, some lg) to feel imperfectly cut. Top header features a 'Select' button for multi-select. When in selection mode, a sticky bottom bar appears with 'Delete' and 'Create with AI' actions."
+    },
+    {
+      "name": "Chat",
+      "purpose": "Private messaging between the couple.",
+      "states": {
+        "loading": "Spinner in the center.",
+        "empty": "Soft text 'Say hello' in the center.",
+        "error": "Failed to load messages with retry."
+      },
+      "layout": "Paper-like chat bubbles. Partner's bubbles are 'surfaceSecondary', own bubbles are 'brandTertiary'. No sharp tails, just rounded 'md' and 'lg' rectangles. Input field pinned to the bottom inside a 'surface' container. No glass."
+    },
+    {
+      "name": "Scribble",
+      "purpose": "A blank canvas for handwritten notes or drawings.",
+      "states": {
+        "loading": "Spinner overlay.",
+        "empty": "Blank canvas.",
+        "error": "Error saving to gallery."
+      },
+      "layout": "Full-screen 'surfaceSecondary' canvas resembling paper. A floating bottom toolbar containing drawing tools (brush, eraser, colors) and a 'Save to Gallery' button."
+    },
+    {
+      "name": "AI Studio",
+      "purpose": "Transform selected photos into new art pieces via prompts.",
+      "states": {
+        "loading": "Pulsing animation on the selected photos.",
+        "empty": "Prompt to select photos from the gallery.",
+        "error": "Error text below the prompt box."
+      },
+      "layout": "Watercolor textured background. At the top, a horizontal scrolling row or overlapping stack of the selected source photos. Below, a large 'surface' multiline text input for the AI prompt. Sticky 'Magic' CTA at the bottom. Once generated, result displays in a prominent polaroid-style frame."
+    },
+    {
+      "name": "Profile",
+      "purpose": "Manage personal info and view partner connection.",
+      "states": {
+        "loading": "Skeleton text blocks.",
+        "empty": "N/A",
+        "error": "Error fetching profile."
+      },
+      "layout": "Editorial-style top section with avatar (or initials circle using 'brandPrimary') and large Name/Nickname. Stacked read-only fields for username and mobile number. A 'surfaceSecondary' card for Settings. 'Log Out' as a 'surfaceInverse' secondary button at the bottom."
+    }
+  ],
+  "images": {
+    "login_hero": {
+      "url": "https://images.unsplash.com/photo-1765498173413-b428f5d0a17e?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxOTB8MHwxfHNlYXJjaHwxfHxtaW5pbWFsaXN0JTIwbGluZSUyMGFydCUyMHJvbWFudGljJTIwY291cGxlJTIwZHJhd2luZ3xlbnwwfHx8fDE3ODUxNTgzNTF8MA&ixlib=rb-4.1.0&q=85",
+      "alt": "Minimalist romantic couple line art drawing"
+    },
+    "gallery_empty": {
+      "url": "https://images.unsplash.com/photo-1776762249712-430700fed7a3",
+      "alt": "Empty notebook page on a minimal desk"
+    },
+    "ai_studio_bg": {
+      "url": "https://images.unsplash.com/photo-1563291074-2bf8677ac0e5?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjY2NzF8MHwxfHNlYXJjaHwxfHxzb2Z0JTIwY2FsbSUyMGFic3RyYWN0JTIwd2F0ZXJjb2xvciUyMHRleHR1cmUlMjBiYWNrZ3JvdW5kJTIwbGlnaHR8ZW58MHx8fHwxNzg0MzA1MjgwfDA&ixlib=rb-4.1.0&q=85",
+      "dark": "https://images.unsplash.com/photo-1563291074-2bf8677ac0e5?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjY2NzF8MHwxfHNlYXJjaHwxfHxzb2Z0JTIwY2FsbSUyMGFic3RyYWN0JTIwd2F0ZXJjb2xvciUyMHRleHR1cmUlMjBiYWNrZ3JvdW5kJTIwbGlnaHR8ZW58MHx8fHwxNzg0MzA1MjgwfDA&ixlib=rb-4.1.0&q=85",
+      "alt": "Watercolor abstract soft texture background"
+    }
+  },
+  "instructions_to_main_agent": [
+    "Strictly follow the 'Hand-Drawn / Journal LIGHT' personality. The aesthetic relies heavily on off-white surfaces, sage accents, and irregular shapes.",
+    "Use a 4-tab bottom navigation: Gallery, Chat, Create, Profile. The 'Create' tab should open a bottom sheet offering 'Upload Photo/Video', 'Scribble', and 'AI Studio' options.",
+    "Do not use any glassmorphism or blur effects. Solid 'surface' and 'surfaceSecondary' layers only.",
+    "For the Gallery, implement a staggered or masonry layout to simulate a scrapbook. Allow long press or a 'Select' header button to enter multi-select mode.",
+    "Always apply the gradient-to-dark scrim pattern (Layer 1: expo-linear-gradient vertical 0% transparent to 100% surfaceInverse >=70%) when overlaying text on images, such as inside Gallery cards if they have captions.",
+    "Use 'Fraunces' for display titles and 'Nunito' for body text. Cap all font weights at 400 or 500.",
+    "Ensure sticky buttons at the bottom of scrollable views (Login, AI Studio, Password Change) have safe-area padding and a solid background to obscure scrolling content."
+  ],
+  "haptics": {
+    "tab_press": "light",
+    "gallery_photo_select": "medium",
+    "gallery_delete": "heavy",
+    "chat_send": "light",
+    "scribble_tool_select": "light",
+    "ai_generate_start": "medium",
+    "ai_generate_success": "success",
+    "primary_button_press": "medium"
+  }
+}
