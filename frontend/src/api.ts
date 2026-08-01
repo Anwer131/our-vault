@@ -1,21 +1,13 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const BASE = process.env.EXPO_PUBLIC_BACKEND_URL;
-const TOKEN_KEY = 'duovault_token';
-const USER_KEY = 'duovault_user';
+const TOKEN_KEY = 'ourspace_token';
+const USER_KEY = 'ourspace_user';
 
-export async function getToken() {
-  return AsyncStorage.getItem(TOKEN_KEY);
-}
-export async function setToken(t: string) {
-  return AsyncStorage.setItem(TOKEN_KEY, t);
-}
-export async function clearAuth() {
-  await AsyncStorage.multiRemove([TOKEN_KEY, USER_KEY]);
-}
-export async function setUser(u: any) {
-  return AsyncStorage.setItem(USER_KEY, JSON.stringify(u));
-}
+export async function getToken() { return AsyncStorage.getItem(TOKEN_KEY); }
+export async function setToken(t: string) { return AsyncStorage.setItem(TOKEN_KEY, t); }
+export async function clearAuth() { await AsyncStorage.multiRemove([TOKEN_KEY, USER_KEY]); }
+export async function setUser(u: any) { return AsyncStorage.setItem(USER_KEY, JSON.stringify(u)); }
 export async function getUser() {
   const raw = await AsyncStorage.getItem(USER_KEY);
   return raw ? JSON.parse(raw) : null;
@@ -43,7 +35,17 @@ export const api = {
   changePassword: (old_password: string, new_password: string) =>
     req('/auth/change-password', { method: 'POST', body: JSON.stringify({ old_password, new_password }) }),
   updateProfile: (data: any) => req('/users/me', { method: 'PATCH', body: JSON.stringify(data) }),
-  listUsers: () => req('/users'),
+
+  // Admin
+  listSpaces: () => req('/spaces'),
+  createSpace: (name: string, max_members: number) =>
+    req('/spaces', { method: 'POST', body: JSON.stringify({ name, max_members }) }),
+  deleteSpace: (id: string) => req(`/spaces/${id}`, { method: 'DELETE' }),
+
+  // Member
+  spaceMembers: () => req('/space/members'),
+  setNickname: (target_id: string, nickname: string) =>
+    req('/nicknames', { method: 'POST', body: JSON.stringify({ target_id, nickname }) }),
 
   getSignature: () => req('/cloudinary/signature', { method: 'POST', body: JSON.stringify({}) }),
   saveMedia: (items: any[]) => req('/media', { method: 'POST', body: JSON.stringify(items) }),
@@ -72,15 +74,12 @@ export async function uploadToCloudinary(asset: any) {
   form.append('signature', sig.signature);
   form.append('folder', sig.folder);
 
-  const r = await fetch(`https://api.cloudinary.com/v1_1/${sig.cloud_name}/${resourceType}/upload`, {
-    method: 'POST',
-    body: form,
-  });
+  const r = await fetch(`https://api.cloudinary.com/v1_1/${sig.cloud_name}/${resourceType}/upload`, { method: 'POST', body: form });
   if (!r.ok) throw new Error(`Upload failed: ${r.status}`);
   return r.json();
 }
 
-export async function uploadBase64ToCloudinary(base64Data: string, resourceType: 'image' = 'image') {
+export async function uploadBase64ToCloudinary(base64Data: string) {
   const sig = await api.getSignature();
   const form: any = new FormData();
   form.append('file', `data:image/png;base64,${base64Data}`);
@@ -88,10 +87,7 @@ export async function uploadBase64ToCloudinary(base64Data: string, resourceType:
   form.append('timestamp', String(sig.timestamp));
   form.append('signature', sig.signature);
   form.append('folder', sig.folder);
-  const r = await fetch(`https://api.cloudinary.com/v1_1/${sig.cloud_name}/${resourceType}/upload`, {
-    method: 'POST',
-    body: form,
-  });
+  const r = await fetch(`https://api.cloudinary.com/v1_1/${sig.cloud_name}/image/upload`, { method: 'POST', body: form });
   if (!r.ok) throw new Error(`Upload failed: ${r.status}`);
   return r.json();
 }

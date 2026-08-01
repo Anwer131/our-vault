@@ -12,7 +12,6 @@ type Props = {
 
 export default function CreateSheet({ open, onClose, onUpload, onScribble, onAI }: Props) {
   const options = [
-    { key: 'upload', icon: 'upload', label: 'Upload Photo / Video', desc: 'Add memories to the gallery', onPress: onUpload, testID: 'create-upload' },
     { key: 'scribble', icon: 'edit-3', label: 'Scribble', desc: 'Draw a note by hand', onPress: onScribble, testID: 'create-scribble' },
     { key: 'ai', icon: 'zap', label: 'AI Studio', desc: 'Craft new art from photos', onPress: onAI, testID: 'create-ai' },
   ] as const;

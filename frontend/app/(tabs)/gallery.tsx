@@ -1,11 +1,11 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, Pressable, ActivityIndicator, Dimensions, RefreshControl } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { Image } from 'expo-image';
 import { Feather } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
-import { api } from '@/src/api';
+import { api, getUser } from '@/src/api';
 import { colors, spacing, radius, fonts } from '@/src/theme';
 
 const { width } = Dimensions.get('window');
@@ -20,9 +20,15 @@ export default function Gallery() {
   const [refreshing, setRefreshing] = useState(false);
   const [selectMode, setSelectMode] = useState(false);
   const [selected, setSelected] = useState<string[]>([]);
+  const [spaceName, setSpaceName] = useState('');
 
   const load = async () => {
     try {
+      const u = await getUser();
+      const members = await api.spaceMembers();
+      // Space name from any member's implied context - fetch via the member list; we don't return space name directly
+      // Fallback: fetch from token payload? We can add a /space endpoint. For now, ask backend to include space name in listMedia? Keep simple: store on user object at login? Not yet. Use a placeholder.
+      setSpaceName(u?.space_name || '');
       const data = await api.listMedia();
       setItems(data);
     } catch (e: any) { console.warn(e.message); }
@@ -46,12 +52,8 @@ export default function Gallery() {
 
   const bulkDelete = async () => {
     if (!selected.length) return;
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-    try {
-      await api.deleteMany(selected);
-      exitSelect();
-      load();
-    } catch (e: any) { console.warn(e.message); }
+    try { await api.deleteMany(selected); exitSelect(); load(); }
+    catch (e: any) { console.warn(e.message); }
   };
 
   const bulkAI = () => {
@@ -73,9 +75,7 @@ export default function Gallery() {
         {item.resource_type === 'video' ? (
           <View style={styles.videoWrap}>
             <Image source={{ uri: item.secure_url.replace('/upload/', '/upload/so_0/').replace(/\.[a-z0-9]+$/, '.jpg') }} style={styles.imgFill} contentFit="cover" />
-            <View style={styles.playIcon}>
-              <Feather name="play" size={22} color={colors.onSurfaceInverse} />
-            </View>
+            <View style={styles.playIcon}><Feather name="play" size={22} color={colors.onSurfaceInverse} /></View>
           </View>
         ) : (
           <Image source={{ uri: item.secure_url }} style={styles.imgFill} contentFit="cover" />
@@ -98,8 +98,8 @@ export default function Gallery() {
   return (
     <SafeAreaView style={styles.container} edges={['top']} testID="gallery-screen">
       <View style={styles.header}>
-        <View>
-          <Text style={styles.title}>Our Scrapbook</Text>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.spaceLabel} testID="gallery-space-name">{spaceName || 'Your Space'}</Text>
           <Text style={styles.sub}>{items.length} {items.length === 1 ? 'memory' : 'memories'}</Text>
         </View>
         {items.length > 0 && (
@@ -115,13 +115,18 @@ export default function Gallery() {
         )}
       </View>
 
+      <Pressable testID="gallery-upload-btn" onPress={() => router.push('/upload')} style={styles.uploadBar}>
+        <Feather name="plus" size={18} color={colors.onSurfaceInverse} />
+        <Text style={styles.uploadBarText}>Add Photos / Videos</Text>
+      </Pressable>
+
       {loading ? (
         <View style={styles.loading}><ActivityIndicator color={colors.brandPrimary} /></View>
       ) : items.length === 0 ? (
         <View style={styles.empty}>
           <Feather name="book-open" size={48} color={colors.muted} />
-          <Text style={styles.emptyTitle}>Start our scrapbook</Text>
-          <Text style={styles.emptySub}>Tap the + tab to upload photos and videos.</Text>
+          <Text style={styles.emptyTitle}>Start your scrapbook</Text>
+          <Text style={styles.emptySub}>Tap “Add Photos / Videos” above.</Text>
         </View>
       ) : (
         <FlatList
@@ -130,7 +135,7 @@ export default function Gallery() {
           keyExtractor={(i) => i.id}
           numColumns={COL}
           columnWrapperStyle={{ gap: GAP }}
-          contentContainerStyle={{ paddingHorizontal: spacing.lg, paddingBottom: selectMode ? 120 : spacing.xl }}
+          contentContainerStyle={{ paddingHorizontal: spacing.lg, paddingBottom: selectMode ? 130 : spacing.xl }}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={colors.brandPrimary} />}
         />
       )}
@@ -156,11 +161,17 @@ export default function Gallery() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.surface },
-  header: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', paddingHorizontal: spacing.lg, paddingTop: spacing.md, paddingBottom: spacing.lg },
-  title: { fontFamily: fonts.displayBold, fontSize: 30, color: colors.onSurface },
+  header: { flexDirection: 'row', alignItems: 'flex-end', paddingHorizontal: spacing.lg, paddingTop: spacing.md, paddingBottom: spacing.md },
+  spaceLabel: { fontFamily: fonts.displayBold, fontSize: 30, color: colors.onSurface },
   sub: { fontFamily: fonts.body, fontSize: 13, color: colors.muted, marginTop: 2 },
   headerBtn: { paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderRadius: radius.pill, backgroundColor: colors.surfaceSecondary },
   headerBtnText: { fontFamily: fonts.bodySemi, fontSize: 13, color: colors.onSurface },
+  uploadBar: {
+    marginHorizontal: spacing.lg, marginBottom: spacing.md,
+    backgroundColor: colors.surfaceInverse, borderRadius: radius.pill,
+    paddingVertical: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
+  },
+  uploadBarText: { color: colors.onSurfaceInverse, fontFamily: fonts.bodySemi, fontSize: 14 },
   loading: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing.xl, gap: spacing.md },
   emptyTitle: { fontFamily: fonts.displayBold, fontSize: 22, color: colors.onSurface },

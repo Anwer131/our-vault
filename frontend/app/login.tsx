@@ -24,6 +24,7 @@ export default function Login() {
       await setUser(res.user);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       if (res.user.must_change_password) router.replace('/change-password');
+      else if (res.user.role === 'superadmin') router.replace('/(admin)/spaces');
       else router.replace('/(tabs)/gallery');
     } catch (e: any) {
       setError(e.message || 'Login failed');
@@ -43,8 +44,8 @@ export default function Login() {
               contentFit="cover"
             />
           </View>
-          <Text style={styles.title}>DuoVault</Text>
-          <Text style={styles.subtitle}>A private scrapbook for two.</Text>
+          <Text style={styles.title}>OurSpace</Text>
+          <Text style={styles.subtitle}>Private spaces for your circle.</Text>
 
           <View style={styles.form}>
             <Text style={styles.label}>Username</Text>
@@ -68,7 +69,7 @@ export default function Login() {
               style={styles.input}
             />
             {!!error && <Text style={styles.error} testID="login-error">{error}</Text>}
-            <Text style={styles.hint}>Default: user1 / user2  |  password: changeme</Text>
+            <Text style={styles.hint}>Admin default: admin / admin123</Text>
           </View>
         </ScrollView>
 

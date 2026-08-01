@@ -11,12 +11,10 @@ export default function Index() {
     (async () => {
       const token = await getToken();
       const user = await getUser();
-      if (token && user) {
-        if (user.must_change_password) router.replace('/change-password');
-        else router.replace('/(tabs)/gallery');
-      } else {
-        router.replace('/login');
-      }
+      if (!token || !user) { router.replace('/login'); return; }
+      if (user.must_change_password) { router.replace('/change-password'); return; }
+      if (user.role === 'superadmin') router.replace('/(admin)/spaces');
+      else router.replace('/(tabs)/gallery');
     })();
   }, []);
 

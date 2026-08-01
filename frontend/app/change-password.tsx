@@ -22,7 +22,8 @@ export default function ChangePassword() {
       await api.changePassword(oldPw, newPw);
       const u = await getUser();
       if (u) { u.must_change_password = false; await setUser(u); }
-      router.replace('/(tabs)/gallery');
+      if (u?.role === 'superadmin') router.replace('/(admin)/spaces');
+      else router.replace('/(tabs)/gallery');
     } catch (e: any) {
       setError(e.message);
     } finally { setLoading(false); }
@@ -36,7 +37,7 @@ export default function ChangePassword() {
           <Text style={styles.sub}>Please set a new password to continue.</Text>
 
           <Text style={styles.label}>Current Password</Text>
-          <TextInput testID="cp-old" value={oldPw} onChangeText={setOldPw} placeholder="changeme" placeholderTextColor={colors.muted} secureTextEntry style={styles.input} />
+          <TextInput testID="cp-old" value={oldPw} onChangeText={setOldPw} placeholder="admin123 or welcome123" placeholderTextColor={colors.muted} secureTextEntry style={styles.input} />
           <Text style={styles.label}>New Password</Text>
           <TextInput testID="cp-new" value={newPw} onChangeText={setNewPw} secureTextEntry style={styles.input} />
           <Text style={styles.label}>Confirm New Password</Text>
