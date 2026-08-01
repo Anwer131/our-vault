@@ -457,3 +457,7 @@ async def on_start():
     await init_db()
     await seed_superadmin()
     logger.info("OurSpace API started")
+
+@app.get("/health")
+async def health():
+    return {"status": "ok"}
