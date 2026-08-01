@@ -8,9 +8,10 @@ import { Feather } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { api, uploadBase64ToCloudinary } from '@/src/api';
 import { colors, spacing, radius, fonts } from '@/src/theme';
+import ProfileButton from '@/src/components/ProfileButton';
 
 type Stroke = { d: string; color: string; width: number };
-const COLORS = [colors.onSurface, colors.brandPrimary, colors.error, colors.warning, colors.info, '#5B7BAF'];
+const COLORS = [colors.onSurface, colors.brandPrimary, colors.error, colors.warning, '#5B7BAF', '#D08770'];
 
 export default function Scribble() {
   const router = useRouter();
@@ -75,11 +76,11 @@ export default function Scribble() {
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']} testID="scribble-screen">
       <View style={styles.header}>
-        <Pressable onPress={() => router.back()} testID="scribble-back"><Feather name="arrow-left" size={22} color={colors.onSurface} /></Pressable>
         <Text style={styles.title}>Scribble</Text>
-        <View style={{ flexDirection: 'row', gap: spacing.md }}>
-          <Pressable onPress={undo} testID="scribble-undo"><Feather name="rotate-ccw" size={20} color={colors.onSurface} /></Pressable>
-          <Pressable onPress={clear} testID="scribble-clear"><Feather name="trash" size={20} color={colors.onSurface} /></Pressable>
+        <View style={{ flexDirection: 'row', gap: spacing.md, alignItems: 'center' }}>
+          <Pressable onPress={undo} testID="scribble-undo" style={styles.iconBtn}><Feather name="rotate-ccw" size={18} color={colors.onSurface} /></Pressable>
+          <Pressable onPress={clear} testID="scribble-clear" style={styles.iconBtn}><Feather name="trash" size={18} color={colors.onSurface} /></Pressable>
+          <ProfileButton />
         </View>
       </View>
 
@@ -123,7 +124,8 @@ export default function Scribble() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.surface },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: spacing.lg, paddingVertical: spacing.md },
-  title: { fontFamily: fonts.displayBold, fontSize: 20, color: colors.onSurface },
+  title: { fontFamily: fonts.displayBold, fontSize: 24, color: colors.onSurface },
+  iconBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: colors.surfaceSecondary, alignItems: 'center', justifyContent: 'center' },
   canvas: { flex: 1, backgroundColor: colors.surfaceSecondary, margin: spacing.md, borderRadius: radius.lg, overflow: 'hidden' },
   toolbar: { padding: spacing.lg, gap: spacing.md, borderTopWidth: 1, borderTopColor: colors.divider },
   colorsRow: { flexDirection: 'row', gap: spacing.sm },

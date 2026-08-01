@@ -63,7 +63,14 @@ export default function Profile() {
   const others = members.filter(m => m.id !== u.id);
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']} testID="profile-screen">
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']} testID="profile-screen">
+      <View style={styles.topbar}>
+        <Pressable onPress={() => router.back()} testID="profile-back" style={styles.iconBtn}>
+          <Feather name="arrow-left" size={22} color={colors.onSurface} />
+        </Pressable>
+        <Text style={styles.topTitle}>Profile</Text>
+        <View style={{ width: 44 }} />
+      </View>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={{ paddingBottom: spacing['3xl'] }} keyboardShouldPersistTaps="handled">
           <View style={styles.header}>
@@ -137,6 +144,9 @@ export default function Profile() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.surface },
+  topbar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: spacing.lg, paddingVertical: spacing.sm },
+  topTitle: { fontFamily: fonts.displayBold, fontSize: 18, color: colors.onSurface },
+  iconBtn: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
   header: { alignItems: 'center', paddingTop: spacing.lg, paddingBottom: spacing.xl },
   avatar: { width: 88, height: 88, borderRadius: 44, backgroundColor: colors.brandPrimary, alignItems: 'center', justifyContent: 'center', marginBottom: spacing.md },
   avatarText: { fontFamily: fonts.displayBold, color: colors.onBrandPrimary, fontSize: 32 },

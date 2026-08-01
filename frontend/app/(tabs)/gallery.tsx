@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import { api, getUser } from '@/src/api';
 import { colors, spacing, radius, fonts } from '@/src/theme';
+import ProfileButton from '@/src/components/ProfileButton';
 
 const { width } = Dimensions.get('window');
 const GAP = spacing.sm;
@@ -25,9 +26,6 @@ export default function Gallery() {
   const load = async () => {
     try {
       const u = await getUser();
-      const members = await api.spaceMembers();
-      // Space name from any member's implied context - fetch via the member list; we don't return space name directly
-      // Fallback: fetch from token payload? We can add a /space endpoint. For now, ask backend to include space name in listMedia? Keep simple: store on user object at login? Not yet. Use a placeholder.
       setSpaceName(u?.space_name || '');
       const data = await api.listMedia();
       setItems(data);
@@ -58,7 +56,7 @@ export default function Gallery() {
 
   const bulkAI = () => {
     if (!selected.length) return;
-    router.push({ pathname: '/ai-studio', params: { ids: selected.join(',') } });
+    router.push({ pathname: '/(tabs)/ai', params: { ids: selected.join(',') } });
     exitSelect();
   };
 
@@ -113,6 +111,9 @@ export default function Gallery() {
             </Pressable>
           )
         )}
+        <View style={{ marginLeft: spacing.sm }}>
+          <ProfileButton />
+        </View>
       </View>
 
       <Pressable testID="gallery-upload-btn" onPress={() => router.push('/upload')} style={styles.uploadBar}>

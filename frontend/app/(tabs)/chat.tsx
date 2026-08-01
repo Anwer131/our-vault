@@ -5,6 +5,7 @@ import { useFocusEffect } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { api, getUser } from '@/src/api';
 import { colors, spacing, radius, fonts } from '@/src/theme';
+import ProfileButton from '@/src/components/ProfileButton';
 
 export default function Chat() {
   const [me, setMe] = useState<any>(null);
@@ -57,6 +58,7 @@ export default function Chat() {
     <SafeAreaView style={styles.container} edges={['top']} testID="chat-screen">
       <View style={styles.header}>
         <Text style={styles.title}>Chat</Text>
+        <ProfileButton />
       </View>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={90} style={{ flex: 1 }}>
         <FlatList
@@ -88,7 +90,7 @@ export default function Chat() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.surface },
-  header: { paddingHorizontal: spacing.lg, paddingTop: spacing.md, paddingBottom: spacing.md, borderBottomWidth: 1, borderBottomColor: colors.divider },
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: spacing.lg, paddingTop: spacing.md, paddingBottom: spacing.md, borderBottomWidth: 1, borderBottomColor: colors.divider },
   title: { fontFamily: fonts.displayBold, fontSize: 24, color: colors.onSurface },
   list: { padding: spacing.lg, paddingBottom: spacing.md },
   row: { marginBottom: spacing.sm, flexDirection: 'row' },

@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
 
 const BASE = process.env.EXPO_PUBLIC_BACKEND_URL;
 const TOKEN_KEY = 'ourspace_token';
@@ -64,18 +65,29 @@ export async function uploadToCloudinary(asset: any) {
   const sig = await api.getSignature();
   const resourceType = (asset.mimeType || '').startsWith('video/') || asset.type === 'video' ? 'video' : 'image';
   const form: any = new FormData();
-  form.append('file', {
-    uri: asset.uri,
-    name: asset.fileName || `upload.${resourceType === 'video' ? 'mp4' : 'jpg'}`,
-    type: asset.mimeType || (resourceType === 'video' ? 'video/mp4' : 'image/jpeg'),
-  } as any);
+
+  if (Platform.OS === 'web') {
+    // On web, fetch the uri (blob: or data:) into a Blob for correct multipart upload
+    const blob = await (await fetch(asset.uri)).blob();
+    const filename = asset.fileName || `upload.${resourceType === 'video' ? 'mp4' : 'jpg'}`;
+    form.append('file', blob, filename);
+  } else {
+    form.append('file', {
+      uri: asset.uri,
+      name: asset.fileName || `upload.${resourceType === 'video' ? 'mp4' : 'jpg'}`,
+      type: asset.mimeType || (resourceType === 'video' ? 'video/mp4' : 'image/jpeg'),
+    } as any);
+  }
   form.append('api_key', sig.api_key);
   form.append('timestamp', String(sig.timestamp));
   form.append('signature', sig.signature);
   form.append('folder', sig.folder);
 
   const r = await fetch(`https://api.cloudinary.com/v1_1/${sig.cloud_name}/${resourceType}/upload`, { method: 'POST', body: form });
-  if (!r.ok) throw new Error(`Upload failed: ${r.status}`);
+  if (!r.ok) {
+    const t = await r.text();
+    throw new Error(`Upload failed: ${r.status} ${t.slice(0, 200)}`);
+  }
   return r.json();
 }
 

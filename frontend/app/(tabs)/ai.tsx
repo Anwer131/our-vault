@@ -7,6 +7,7 @@ import { Feather } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { api } from '@/src/api';
 import { colors, spacing, radius, fonts } from '@/src/theme';
+import ProfileButton from '@/src/components/ProfileButton';
 
 export default function AIStudio() {
   const router = useRouter();
@@ -53,9 +54,8 @@ export default function AIStudio() {
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']} testID="ai-studio-screen">
       <View style={styles.header}>
-        <Pressable onPress={() => router.back()} testID="ai-back"><Feather name="arrow-left" size={22} color={colors.onSurface} /></Pressable>
         <Text style={styles.title}>AI Studio</Text>
-        <View style={{ width: 22 }} />
+        <ProfileButton />
       </View>
 
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
@@ -143,7 +143,7 @@ export default function AIStudio() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.surface },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: spacing.lg, paddingVertical: spacing.md },
-  title: { fontFamily: fonts.displayBold, fontSize: 20, color: colors.onSurface },
+  title: { fontFamily: fonts.displayBold, fontSize: 24, color: colors.onSurface },
   sectionLabel: { fontFamily: fonts.bodySemi, fontSize: 13, color: colors.onSurfaceSecondary, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: spacing.sm },
   hint: { fontFamily: fonts.body, color: colors.muted, marginVertical: spacing.lg },
   hintSm: { fontFamily: fonts.body, fontSize: 12, color: colors.muted, marginBottom: spacing.sm },
