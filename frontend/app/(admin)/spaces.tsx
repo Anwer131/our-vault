@@ -221,21 +221,3 @@ const styles = StyleSheet.create({
   credLabel: { fontFamily: fonts.body, fontSize: 11, color: colors.muted },
   credValue: { fontFamily: fonts.bodySemi, fontSize: 15, color: colors.onSurface, marginTop: 2 },
 });
-s.bodyMedium, fontSize: 12, color: colors.onSurfaceSecondary, marginTop: spacing.md, marginBottom: spacing.xs },
-  input: {
-    borderWidth: 1, borderColor: colors.border, borderRadius: radius.md,
-    paddingHorizontal: spacing.md, paddingVertical: 12, fontSize: 15,
-    fontFamily: fonts.body, color: colors.onSurface,
-  },
-  error: { color: colors.error, fontFamily: fonts.bodyMedium, marginTop: spacing.sm },
-  cta: { marginTop: spacing.lg, backgroundColor: colors.surfaceInverse, borderRadius: radius.pill, paddingVertical: 14, alignItems: 'center' },
-  ctaText: { color: colors.onSurfaceInverse, fontFamily: fonts.bodySemi, fontSize: 15 },
-  credHint: { fontFamily: fonts.body, color: colors.onSurfaceSecondary, marginBottom: spacing.md },
-  credRow: {
-    flexDirection: 'row', justifyContent: 'space-between',
-    backgroundColor: colors.surfaceSecondary, padding: spacing.md,
-    borderRadius: radius.md, marginBottom: spacing.sm,
-  },
-  credLabel: { fontFamily: fonts.body, fontSize: 11, color: colors.muted },
-  credValue: { fontFamily: fonts.bodySemi, fontSize: 15, color: colors.onSurface, marginTop: 2 },
-});
