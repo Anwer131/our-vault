@@ -299,7 +299,7 @@ async def ai_generate(body: AIGenerateIn, user=Depends(current_user)):
         gclient = genai.Client(api_key=GEMINI_API_KEY)
         contents = [body.prompt] + image_parts
         response = gclient.models.generate_content(
-            model="gemini-2.5-flash-image-preview",
+            model="gemini-2.5-flash-image",
             contents=contents,
         )
     except Exception as e:
