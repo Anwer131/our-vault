@@ -17,6 +17,7 @@ export default function AdminSpaces() {
   const [newCount, setNewCount] = useState('4');
   const [creating, setCreating] = useState(false);
   const [creds, setCreds] = useState<any>(null);
+  const [confirmDel, setConfirmDel] = useState<{ id: string; name: string } | null>(null);
   const [error, setError] = useState('');
 
   const load = async () => {
@@ -47,11 +48,17 @@ export default function AdminSpaces() {
   };
 
   const del = async (id: string, name: string) => {
+    setConfirmDel({ id, name });
+  };
+
+  const doDelete = async () => {
+    if (!confirmDel) return;
     try {
-      await api.deleteSpace(id);
+      await api.deleteSpace(confirmDel.id);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      setConfirmDel(null);
       load();
-    } catch (e: any) { console.warn(e.message); }
+    } catch (e: any) { console.warn(e.message); setConfirmDel(null); }
   };
 
   const logout = async () => { await clearAuth(); router.replace('/login'); };
@@ -197,6 +204,24 @@ const styles = StyleSheet.create({
   handle: { alignSelf: 'center', width: 40, height: 4, borderRadius: 2, backgroundColor: colors.border, marginBottom: spacing.md },
   sheetTitle: { fontFamily: fonts.displayBold, fontSize: 22, color: colors.onSurface, marginBottom: spacing.md },
   label: { fontFamily: fonts.bodyMedium, fontSize: 12, color: colors.onSurfaceSecondary, marginTop: spacing.md, marginBottom: spacing.xs },
+  input: {
+    borderWidth: 1, borderColor: colors.border, borderRadius: radius.md,
+    paddingHorizontal: spacing.md, paddingVertical: 12, fontSize: 15,
+    fontFamily: fonts.body, color: colors.onSurface,
+  },
+  error: { color: colors.error, fontFamily: fonts.bodyMedium, marginTop: spacing.sm },
+  cta: { marginTop: spacing.lg, backgroundColor: colors.surfaceInverse, borderRadius: radius.pill, paddingVertical: 14, alignItems: 'center' },
+  ctaText: { color: colors.onSurfaceInverse, fontFamily: fonts.bodySemi, fontSize: 15 },
+  credHint: { fontFamily: fonts.body, color: colors.onSurfaceSecondary, marginBottom: spacing.md },
+  credRow: {
+    flexDirection: 'row', justifyContent: 'space-between',
+    backgroundColor: colors.surfaceSecondary, padding: spacing.md,
+    borderRadius: radius.md, marginBottom: spacing.sm,
+  },
+  credLabel: { fontFamily: fonts.body, fontSize: 11, color: colors.muted },
+  credValue: { fontFamily: fonts.bodySemi, fontSize: 15, color: colors.onSurface, marginTop: 2 },
+});
+s.bodyMedium, fontSize: 12, color: colors.onSurfaceSecondary, marginTop: spacing.md, marginBottom: spacing.xs },
   input: {
     borderWidth: 1, borderColor: colors.border, borderRadius: radius.md,
     paddingHorizontal: spacing.md, paddingVertical: 12, fontSize: 15,
