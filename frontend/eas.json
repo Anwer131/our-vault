@@ -4,11 +4,28 @@
       "environment": "preview",
       "distribution": "internal",
       "android": {
-        "buildType": "apk"
+        "buildType": "apk",
+        "gradleCommand": ":app:assembleRelease",
+        "properties": {
+          "android.enableProguardInReleaseBuilds": true,
+          "android.enableShrinkResourcesInReleaseBuilds": true,
+          "android.enableR8.fullMode": true,
+          "android.experimental.enableNewResourceShrinker": true
+        }
       }
     },
     "production": {
-      "environment": "production"
+      "environment": "production",
+      "android": {
+        "buildType": "apk",
+        "gradleCommand": ":app:assembleRelease",
+        "properties": {
+          "android.enableProguardInReleaseBuilds": true,
+          "android.enableShrinkResourcesInReleaseBuilds": true,
+          "android.enableR8.fullMode": true,
+          "android.experimental.enableNewResourceShrinker": true
+        }
+      }
     }
   }
 }

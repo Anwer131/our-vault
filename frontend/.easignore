@@ -1,0 +1,41 @@
+# EAS Build ignore file — excludes files from the build upload context
+# Syntax is identical to .gitignore
+
+# Expo local state
+.expo/
+
+# Metro cache
+.metro-cache/
+.metro-health-check*
+
+# Local environment files (EAS uses dashboard env vars)
+.env
+.env*.local
+
+# TypeScript build info
+*.tsbuildinfo
+expo-env.d.ts
+
+# Linting & formatting (not needed at build time)
+eslint.config.js
+
+# Documentation
+README.md
+
+# OS files
+.DS_Store
+*.pem
+
+# Backup files
+*.orig.*
+
+# Debug logs
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# Lock files (EAS regenerates these based on packageManager field)
+package-lock.json
+
+# App example template (if exists)
+app-example
