@@ -36,7 +36,7 @@ export default function Login() {
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
-        <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
+        <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
           <View style={styles.heroWrap}>
             <Image
               source={{ uri: 'https://images.unsplash.com/photo-1765498173413-b428f5d0a17e?crop=entropy&cs=srgb&fm=jpg&w=800&q=85' }}
