@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Depends, Header
+from fastapi import FastAPI, APIRouter, HTTPException, Depends, Header, WebSocket, WebSocketDisconnect
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 import os
@@ -7,6 +7,7 @@ import random
 import string
 import logging
 import base64
+import asyncio
 from pathlib import Path
 from pydantic import BaseModel
 from typing import List, Optional
@@ -42,6 +43,55 @@ JWT_ALG = "HS256"
 
 app = FastAPI()
 api = APIRouter(prefix="/api")
+
+# ============ WebSocket Connection Manager ============
+class ConnectionManager:
+    """Manages WebSocket connections grouped by space_id for real-time notifications.
+    Tracks user_id per connection so the sender can be excluded from broadcasts."""
+    def __init__(self):
+        self.active: dict[str, dict[WebSocket, str]] = {}  # space_id -> {ws: user_id}
+
+    async def connect(self, ws: WebSocket, space_id: str, user_id: str):
+        await ws.accept()
+        if space_id not in self.active:
+            self.active[space_id] = {}
+        self.active[space_id][ws] = user_id
+        logger.info(f"WS connected: space={space_id}, user={user_id}, total={len(self.active[space_id])}")
+
+    def disconnect(self, ws: WebSocket, space_id: str):
+        if space_id in self.active:
+            self.active[space_id].pop(ws, None)
+            if not self.active[space_id]:
+                del self.active[space_id]
+            logger.info(f"WS disconnected: space={space_id}")
+
+    async def broadcast(self, space_id: str, message: dict, exclude_user_id: str = None):
+        """Send a notification to all connected clients in a space.
+        If exclude_user_id is set, that user (the sender) is skipped."""
+        if space_id not in self.active:
+            return
+        dead = []
+        for ws, uid_ in self.active[space_id].items():
+            if exclude_user_id and uid_ == exclude_user_id:
+                continue
+            try:
+                await ws.send_json(message)
+            except Exception:
+                dead.append(ws)
+        for ws in dead:
+            self.active[space_id].pop(ws, None)
+
+manager = ConnectionManager()
+
+# ============ WebSocket ping/keepalive ============
+async def _ping_loop(ws: WebSocket, interval: float = 30):
+    """Periodically send a ping to keep the WebSocket alive and detect stale connections."""
+    try:
+        while True:
+            await asyncio.sleep(interval)
+            await ws.send_json({"type": "ping"})
+    except Exception:
+        pass  # connection closed or errored — task will be cancelled
 
 # ============ Slug generation ============
 SLUG_WORDS = [
@@ -319,6 +369,7 @@ def media_dict(m: Media) -> dict:
 @api.post("/media")
 async def save_media(items: List[MediaItemIn], user: User = Depends(require_member), db: AsyncSession = Depends(get_db)):
     ids = []
+    saved_items = []
     for it in items:
         m = Media(
             id=uid(), space_id=user.space_id, uploader_id=user.id,
@@ -328,7 +379,18 @@ async def save_media(items: List[MediaItemIn], user: User = Depends(require_memb
         )
         db.add(m)
         ids.append(m.id)
+        saved_items.append(m)
     await db.commit()
+    # Broadcast notification to all connected users in the space (excluding sender)
+    await manager.broadcast(user.space_id, {
+        "type": "media",
+        "data": {
+            "uploader_id": user.id,
+            "uploader_username": user.username,
+            "count": len(saved_items),
+            "resource_types": [m.resource_type for m in saved_items],
+        }
+    }, exclude_user_id=user.id)
     return {"inserted": len(ids), "ids": ids}
 
 @api.get("/media")
@@ -376,7 +438,13 @@ async def send_message(body: ChatMessageIn, user: User = Depends(require_member)
     db.add(m)
     await db.commit()
     await db.refresh(m)
-    return message_dict(m, sender_username=user.username)
+    msg_dict = message_dict(m, sender_username=user.username)
+    # Broadcast notification to all connected users in the space (excluding sender)
+    await manager.broadcast(user.space_id, {
+        "type": "chat",
+        "data": msg_dict
+    }, exclude_user_id=user.id)
+    return msg_dict
 
 @api.get("/chat/messages")
 async def list_messages(user: User = Depends(require_member), db: AsyncSession = Depends(get_db)):
@@ -461,3 +529,38 @@ async def on_start():
 @app.get("/health")
 async def health():
     return {"status": "ok"}
+
+# ============ WebSocket endpoint ============
+@app.websocket("/ws")
+async def websocket_endpoint(ws: WebSocket, token: str = ""):
+    """WebSocket endpoint for real-time notifications.
+    Authenticates via JWT token passed as query parameter.
+    Groups connections by space_id for targeted broadcasting.
+    """
+    if not token:
+        await ws.close(code=4001)
+        return
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALG])
+    except Exception:
+        await ws.close(code=4001)
+        return
+    async with SessionLocal() as db:
+        user = await db.get(User, payload["sub"])
+    if not user or not user.space_id:
+        await ws.close(code=4003)
+        return
+    space_id = user.space_id
+    user_id = user.id
+    await manager.connect(ws, space_id, user_id)
+    ping_task = asyncio.create_task(_ping_loop(ws))
+    try:
+        while True:
+            # Keep connection alive; we don't expect client messages
+            await ws.receive_text()
+    except WebSocketDisconnect:
+        ping_task.cancel()
+        manager.disconnect(ws, space_id)
+    except Exception:
+        ping_task.cancel()
+        manager.disconnect(ws, space_id)

@@ -1,9 +1,10 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useRef, useState, useEffect } from 'react';
 import { View, Text, TextInput, StyleSheet, FlatList, Pressable, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { api, getUser } from '@/src/api';
+import { useNotificationContext } from '@/src/contexts/NotificationContext';
 import { colors, spacing, radius, fonts } from '@/src/theme';
 import ProfileButton from '@/src/components/ProfileButton';
 
@@ -14,6 +15,8 @@ export default function Chat() {
   const [sending, setSending] = useState(false);
   const listRef = useRef<FlatList>(null);
   const pollRef = useRef<any>(null);
+  const messagesRef = useRef<any[]>([]);  // ref to avoid stale closure in notification effect
+  const { notifications } = useNotificationContext();
 
   const load = async () => {
     try {
@@ -25,9 +28,26 @@ export default function Chat() {
 
   useFocusEffect(useCallback(() => {
     (async () => { setMe(await getUser()); await load(); })();
-    pollRef.current = setInterval(load, 4000);
+    pollRef.current = setInterval(load, 10000);
     return () => { if (pollRef.current) clearInterval(pollRef.current); };
   }, []));
+
+  // Keep ref in sync with state so the notification effect doesn't use stale closure
+  useEffect(() => { messagesRef.current = messages; }, [messages]);
+
+  // Listen for real-time chat notifications
+  useEffect(() => {
+    const chatNotifs = notifications.filter(n => n.type === 'chat');
+    if (chatNotifs.length === 0) return;
+    const latest = chatNotifs[chatNotifs.length - 1];
+    if (latest.data && !messagesRef.current.some(m => m.id === latest.data.id)) {
+      setMessages(prev => {
+        if (prev.some(m => m.id === latest.data.id)) return prev;
+        return [...prev, latest.data];
+      });
+      setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 100);
+    }
+  }, [notifications]);
 
   const send = async () => {
     if (!text.trim() || sending) return;

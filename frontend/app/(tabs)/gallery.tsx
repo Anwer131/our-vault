@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, Pressable, ActivityIndicator, Dimensions, RefreshControl } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { Image } from 'expo-image';
@@ -6,6 +6,7 @@ import { Feather } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import { api, getUser } from '@/src/api';
+import { useNotificationContext } from '@/src/contexts/NotificationContext';
 import { colors, spacing, radius, fonts } from '@/src/theme';
 import ProfileButton from '@/src/components/ProfileButton';
 
@@ -22,10 +23,13 @@ export default function Gallery() {
   const [selectMode, setSelectMode] = useState(false);
   const [selected, setSelected] = useState<string[]>([]);
   const [spaceName, setSpaceName] = useState('');
+  const [me, setMe] = useState<any>(null);
+  const { notifications } = useNotificationContext();
 
   const load = async () => {
     try {
       const u = await getUser();
+      setMe(u);
       setSpaceName(u?.space_name || '');
       const data = await api.listMedia();
       setItems(data);
@@ -34,6 +38,16 @@ export default function Gallery() {
   };
 
   useFocusEffect(useCallback(() => { load(); }, []));
+
+  // Auto-refresh when a media notification arrives (excluding own uploads)
+  useEffect(() => {
+    const mediaNotifs = notifications.filter(
+      n => n.type === 'media' && n.data?.uploader_id !== me?.id
+    );
+    if (mediaNotifs.length > 0) {
+      load();
+    }
+  }, [notifications, me?.id]);
 
   const toggle = (id: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
